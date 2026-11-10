@@ -1,6 +1,6 @@
 # Planner Motorsport — Design
 
-Data: 2026-11-10
+Data: 2026-11-10 — approvato; piano parte il 2026-11-10 (settimana 1 = 10-16 nov 2026)
 
 ## Intento (il perché)
 Entrare nel motorsport (auto), guadagnare di più e viaggiare di più.
