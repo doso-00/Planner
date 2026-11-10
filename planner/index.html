@@ -1,0 +1,579 @@
+<title>Rotta per il Paddock</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: a timing-screen summary on top, then one column of working sections (week, log, roadmap, scorecard, messages, reference). */
+:root {
+  --bg: #F1F3F6; --surface: #FFFFFF; --sunk: #E7EBF0; --ink: #12161B; --muted: #566270; --line: #D8DEE5;
+  --accent: #1450C8; --accent-ink: #FFFFFF; --accent-soft: #E3EBFB;
+  --good: #1D7F47; --warn: #9A6412; --crit: #B42828; --best: #6C34B8;
+  --f-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --f-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 6px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0D1115; --surface: #151A20; --sunk: #1C232B; --ink: #E7EBEF; --muted: #98A3AF; --line: #28313B;
+  --accent: #7AA2FF; --accent-ink: #0D1115; --accent-soft: #1B2740;
+  --good: #49C27F; --warn: #E2A84B; --crit: #F06A6A; --best: #B793FF; color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #0D1115; --surface: #151A20; --sunk: #1C232B; --ink: #E7EBEF; --muted: #98A3AF; --line: #28313B;
+  --accent: #7AA2FF; --accent-ink: #0D1115; --accent-soft: #1B2740;
+  --good: #49C27F; --warn: #E2A84B; --crit: #F06A6A; --best: #B793FF; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--f-body); }
+.wrap { max-width: 980px; margin: 0 auto; padding-block: 24px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 28px; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 700; letter-spacing: .01em; text-wrap: balance; margin: 0; line-height: 1.1; }
+h1 { font-size: 40px; text-transform: uppercase; }
+h2 { font-size: 26px; text-transform: uppercase; }
+h3 { font-size: 19px; }
+p { margin: 0; }
+a { color: var(--accent); }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.mono, .num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.eyebrow { font: 600 12px/1 var(--f-body); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+section { display: grid; gap: 14px; min-width: 0; }
+.sec-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; min-width: 0; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* header + timing tower */
+header { display: grid; gap: 16px; }
+.title-row { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: end; justify-content: space-between; }
+.chk { display: inline-block; width: 28px; height: 14px; vertical-align: middle; margin-right: 10px; border-radius: 2px;
+  background: repeating-conic-gradient(var(--ink) 0 25%, transparent 0 50%) 0 0 / 7px 7px; }
+.tower { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.tower > div { padding: 12px 14px; display: grid; gap: 4px; border-left: 1px solid var(--line); min-width: 0; }
+.tower > div:first-child { border-left: 0; }
+.tower .val { font: 500 24px/1.1 var(--f-mono); font-variant-numeric: tabular-nums; }
+.tower .val small { font-size: 14px; color: var(--muted); }
+.bar { height: 4px; background: var(--sunk); border-radius: 2px; overflow: hidden; }
+.bar > i { display: block; height: 100%; background: var(--accent); border-radius: 2px; }
+@media (max-width: 640px) { .tower { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tower > div:nth-child(3) { border-left: 0; } .tower > div:nth-child(n+3) { border-top: 1px solid var(--line); } h1 { font-size: 32px; } }
+.status-line { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font: 600 12px/1.4 var(--f-body); background: var(--sunk); color: var(--ink); }
+.pill.accent { background: var(--accent-soft); color: var(--accent); }
+.pill.crit { color: var(--crit); }
+.note { padding: 10px 14px; border-radius: var(--r); background: var(--sunk); font-size: 14px; }
+
+/* tasks */
+ul.tasks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.task { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 12px; display: grid; gap: 6px; min-width: 0; }
+.task.done { border-color: color-mix(in srgb, var(--good) 45%, var(--line)); }
+.task.done .t-title { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--good); }
+.task.locked { opacity: .62; }
+.task.checkpoint { border-left: 6px solid transparent; border-image: repeating-linear-gradient(180deg, var(--ink) 0 6px, var(--surface) 6px 12px) 6; }
+.t-row { display: flex; gap: 10px; align-items: flex-start; }
+.t-row input { width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--good); flex: none; }
+.t-title { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.t-meta { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 13px; color: var(--muted); padding-left: 30px; }
+.t-meta .k-lezione-claude { color: var(--best); font-weight: 600; }
+.t-meta .k-checkpoint { color: var(--ink); font-weight: 600; }
+.t-meta .late { color: var(--crit); font-weight: 600; }
+details.t-more { padding-left: 30px; }
+details.t-more summary { cursor: pointer; font-size: 13px; color: var(--accent); width: fit-content; }
+details.t-more[open] { display: grid; gap: 8px; }
+.t-detail { font-size: 14px; overflow-wrap: anywhere; }
+textarea, input[type="text"], input[type="number"], input[type="date"], select {
+  font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 8px 10px; width: 100%; min-width: 0; }
+textarea { resize: vertical; min-height: 64px; }
+button { font: 600 14px/1 var(--f-body); border: 0; border-radius: var(--r); padding: 10px 16px; background: var(--accent); color: var(--accent-ink); cursor: pointer; }
+button:hover { filter: brightness(1.08); }
+button.ghost { background: var(--sunk); color: var(--ink); }
+
+/* log */
+.log-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+@media (max-width: 760px) { .log-grid { grid-template-columns: minmax(0, 1fr); } }
+form.log { display: grid; gap: 10px; }
+.fields { display: grid; grid-template-columns: minmax(0, 1fr) 96px; gap: 10px; }
+label.f { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+.err { color: var(--crit); font-size: 13px; }
+.chart svg { width: 100%; height: auto; display: block; }
+.chart text { fill: var(--muted); font: 10px var(--f-mono); }
+.chart .lbl { fill: var(--ink); font-weight: 500; }
+.chart .grid { stroke: var(--line); stroke-width: 1; }
+.chart .target { stroke: var(--warn); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.chart .b { fill: var(--accent); }
+.chart .b.cur { fill: var(--best); }
+ol.entries { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 14px; }
+ol.entries li { display: grid; grid-template-columns: 88px 44px minmax(0, 1fr); gap: 10px; padding: 6px 0; border-top: 1px solid var(--line); }
+ol.entries li > span:last-child { overflow-wrap: anywhere; }
+
+/* roadmap */
+.phases { display: grid; grid-template-columns: 5fr 8fr 20fr 20fr; gap: 3px; }
+.ph { display: grid; gap: 4px; min-width: 0; }
+.ph .seg { height: 10px; border-radius: 2px; background: var(--sunk); overflow: hidden; }
+.ph .seg i { display: block; height: 100%; background: var(--good); }
+.ph.now .seg { outline: 2px solid var(--accent); outline-offset: 1px; }
+.ph .cap { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 520px) { .phases { grid-template-columns: 1fr; } }
+details.phase { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+details.phase > summary { cursor: pointer; padding: 12px 14px; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; justify-content: space-between; }
+details.phase > div { padding: 0 12px 12px; display: grid; gap: 12px; }
+.group-title { font: 600 13px/1.2 var(--f-body); color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+
+/* scorecard */
+.scores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 760px) { .scores { grid-template-columns: minmax(0, 1fr); } }
+.score { display: grid; gap: 10px; }
+.score.lead { border-color: var(--best); }
+.score .tot { font: 500 28px/1 var(--f-mono); }
+.slider { display: grid; grid-template-columns: 92px minmax(0, 1fr) 18px; gap: 8px; align-items: center; font-size: 13px; }
+.slider input { width: 100%; accent-color: var(--accent); }
+
+/* inbox */
+ul.msgs { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+ul.msgs li { display: grid; gap: 4px; }
+.reply { border-left: 3px solid var(--best); padding-left: 10px; }
+
+/* reference */
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 720px; font-size: 14px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-top: 1px solid var(--line); }
+th { font: 600 12px/1.2 var(--f-body); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); border-top: 0; background: var(--sunk); }
+.fit { font-family: var(--f-mono); color: var(--best); white-space: nowrap; }
+.compass { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 640px) { .compass { grid-template-columns: minmax(0, 1fr); } }
+.compass .panel { display: grid; gap: 6px; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: var(--r); font-size: 14px; max-width: calc(100% - 32px); }
+@media (prefers-reduced-motion: no-preference) { .bar > i, .ph .seg i { transition: width .4s ease; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="title-row">
+      <div>
+        <p class="eyebrow">Planner · motorsport · 52 settimane</p>
+        <h1><span class="chk" aria-hidden="true"></span>Rotta per il Paddock</h1>
+      </div>
+      <div class="status-line">
+        <span class="pill accent" id="week-label">Settimana –</span>
+        <span class="pill" id="phase-label">Fase –</span>
+        <span class="pill" id="cp-label">Prossimo checkpoint –</span>
+      </div>
+    </div>
+    <div class="tower" aria-label="Riepilogo">
+      <div><span class="eyebrow">Ore questa settimana</span><span class="val"><span id="hours-week">0</span> <small id="hours-target">/ 7 h</small></span><div class="bar"><i id="hours-bar" style="width:0%"></i></div></div>
+      <div><span class="eyebrow">Ore totali</span><span class="val" id="hours-total">0 h</span><span class="small muted" id="hours-pace">obiettivo 7 h a settimana</span></div>
+      <div><span class="eyebrow">Compiti fatti</span><span class="val"><span id="done-count">0</span> <small id="done-total">/ 0</small></span><div class="bar"><i id="done-bar" style="width:0%"></i></div></div>
+      <div><span class="eyebrow">Budget corsi</span><span class="val"><span id="spent">0</span> <small>/ 300 €</small></span><div class="bar"><i id="spent-bar" style="width:0%"></i></div></div>
+    </div>
+    <p class="note" id="offline-note" hidden>Il piano e i tuoi progressi si aprono solo dentro claude.ai. Qui vedi la mappa dei ruoli e la bussola, ma non puoi salvare.</p>
+    <p class="note" id="load-note" hidden>I dati non rispondono ancora. Controlla la connessione: la pagina si aggiorna da sola appena arrivano.</p>
+    <p class="note" id="empty-state" hidden>Il piano non è ancora caricato. Appena Claude lo inserisce qui compaiono i compiti della settimana, la roadmap e la scorecard.</p>
+  </header>
+
+  <section aria-labelledby="h-week">
+    <div class="sec-head"><h2 id="h-week">Questa settimana</h2><span class="small muted" id="week-range"></span></div>
+    <ul class="tasks" id="week-tasks"></ul>
+    <div id="late-wrap" hidden>
+      <p class="group-title" style="margin-bottom:8px">Rimasti indietro</p>
+      <ul class="tasks" id="late-tasks"></ul>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-log">
+    <div class="sec-head"><h2 id="h-log">Registro progressi</h2><span class="small muted">Lo leggo a ogni sessione per adattare il piano</span></div>
+    <div class="log-grid">
+      <form class="log panel" id="log-form" novalidate>
+        <div class="fields">
+          <label class="f">Data<input type="date" id="log-date"></label>
+          <label class="f">Ore<input type="text" inputmode="decimal" id="log-hours" placeholder="1,5"></label>
+        </div>
+        <label class="f">Compito (facoltativo)<select id="log-task"><option value="">Nessuno in particolare</option></select></label>
+        <label class="f">Cosa hai fatto, cosa è stato difficile<textarea id="log-note" placeholder="Fatto il test EF SET: B2 alto. Ascolto ok, scrittura lenta."></textarea></label>
+        <p class="err" id="log-error" hidden>Scrivi le ore come numero tra 0,25 e 24, per esempio 1,5.</p>
+        <div><button type="submit" id="log-submit">Salva nel registro</button></div>
+      </form>
+      <div class="panel chart" style="display:grid;gap:10px">
+        <div class="sec-head"><h3>Ore per settimana</h3><span class="small muted">linea tratteggiata = obiettivo</span></div>
+        <div id="hours-chart"></div>
+        <ol class="entries" id="log-entries"></ol>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-road">
+    <div class="sec-head"><h2 id="h-road">Roadmap</h2><span class="small muted">10 nov 2026 → 8 nov 2027</span></div>
+    <div class="phases" id="phase-strip"></div>
+    <div id="phase-list" style="display:grid;gap:10px"></div>
+  </section>
+
+  <section aria-labelledby="h-score">
+    <div class="sec-head"><h2 id="h-score">Scorecard delle tre strade</h2><span class="small muted">Da 0 a 5. Compilala ai checkpoint 1 e 2</span></div>
+    <div class="scores" id="scores"></div>
+    <div class="panel" style="display:grid;gap:8px">
+      <label class="f" for="branch-select">Strada scelta per la Fase 2 (si decide al checkpoint 2, settimana 8)</label>
+      <select id="branch-select">
+        <option value="">Non ancora scelta</option>
+        <option value="dati">Dati & performance</option>
+        <option value="operazioni">Operazioni & logistica</option>
+        <option value="pista">Pista, timing & gara</option>
+      </select>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-inbox">
+    <div class="sec-head"><h2 id="h-inbox">Messaggi per Claude</h2><span class="small muted">Domande, dubbi, richieste di lezione. Li leggo e rispondo qui</span></div>
+    <form class="panel" id="inbox-form" style="display:grid;gap:10px" novalidate>
+      <textarea id="inbox-text" placeholder="Ho finito il mini-progetto FastF1, mi correggi il grafico? Oppure: questa settimana ho solo 3 ore."></textarea>
+      <div><button type="submit" id="inbox-submit">Invia a Claude</button></div>
+    </form>
+    <ul class="msgs" id="inbox-list"></ul>
+  </section>
+
+  <section aria-labelledby="h-roles">
+    <div class="sec-head"><h2 id="h-roles">Mappa ruoli</h2><span class="small muted">Motorsport auto · fit rispetto a SQL, AWS e dati</span></div>
+    <div class="tbl"><table>
+      <thead><tr><th>Ruolo</th><th>Cosa fa</th><th>Dove</th><th>Viaggi</th><th>Fit</th><th>Fonte</th></tr></thead>
+      <tbody id="roles"></tbody>
+    </table></div>
+  </section>
+
+  <section aria-labelledby="h-compass">
+    <div class="sec-head"><h2 id="h-compass">Bussola</h2><span class="small muted">Cosa ti rende utile quando il codice lo scrive l'AI</span></div>
+    <div class="compass" id="compass"></div>
+  </section>
+
+  <p class="small muted">Come funziona: quello che spunti e scrivi qui viene salvato nel database della pagina. Claude lo legge dalla sessione e può aggiungere compiti, spostare scadenze e rispondere ai messaggi.</p>
+</div>
+
+<script>
+(() => {
+  // ---------- static reference content ----------
+  const ROLES = [
+    ['Data Engineer / BI di team o serie', 'Pipeline e data warehouse per telemetria, simulazione e business. SQL, cloud AWS.', 'Team F1 (UK), Formula 1 Group, costruttori, Motor Valley', 'Pochi', '●●●', 'https://builtinlondon.uk/job/data-engineer/8401932'],
+    ['Performance / Race Data Engineer', 'Analizza la telemetria (MoTeC, ATLAS, WinDarab) e aiuta il race engineer a rendere l\'auto più veloce. Junior UK circa £35–50k.', 'Team F1, WEC, GT, F2/F3, F4', 'Tanti', '●●○', 'https://www.motorsportjobs.com/fr/job/data-engineer-6'],
+    ['Timing & Scoring / dati live', 'Cronometraggio, classifiche, live timing e grafiche TV durante la gara.', 'Al Kamel Systems (WEC, IMSA, Formula E), fornitori timing', 'Tantissimi', '●●○', 'https://www.fiawec.com/en/news/its-all-a-matter-of-timing-spotlight-on-al-kamel-systems/2231'],
+    ['Strategy Analyst / Engineer', 'Simulazioni di gara, pit stop, gomme, probabilità. Decisioni sotto pressione.', 'Team F1 e WEC', 'Tanti', '●○○', 'https://www.motorsport.com/f1/news/f1-become-strategy-engineer-haas/6628281/'],
+    ['Team / Travel / Logistics Coordinator', 'Organizza persone, voli, hotel, camion e materiale per ogni gara. £30–60k nel Regno Unito.', 'Team GT, WEC, rally, F1, media', 'Massimi', '●○○', 'https://www.jobleads.com/gb/job/team-travel-coordinator--london--ec7c92b352e0117d98668b0a3014cb941'],
+    ['Ufficiale di gara ACI', 'Commissario di percorso, verificatore sportivo o tecnico. Volontario: è la porta d\'ingresso al paddock.', 'Circuiti e rally in Italia', 'Weekend', 'ingresso', 'https://www.lautomobile.aci.it/sport/specialist-motorsport-academy-la-scuola-di-formazione-aci/'],
+  ];
+  const COMPASS = [
+    ['Capire l\'auto e la gara', 'L\'AI scrive la query, ma non sa se il dato ha senso in pista. Chi conosce dinamica, gomme e regolamento sa cosa chiedere.'],
+    ['Trasformare dati in decisioni', 'Il valore non è il grafico: è dire "fermiamoci al giro 18". Ogni mini-progetto finisce con una conclusione scritta.'],
+    ['Comunicare sotto pressione', 'Con ingegneri e piloti, in inglese, in poche parole. Si allena con le conversazioni e le simulazioni di colloquio.'],
+    ['Essere presente e affidabile', 'In pista serve chi c\'è alle 6 del mattino e non sbaglia. L\'AI non va al box.'],
+    ['Organizzare persone e tempi', 'Trasferte, budget, scadenze: il lavoro che tiene in piedi un team.'],
+    ['Usare l\'AI e verificarla', 'Far scrivere il codice all\'AI e capire quando sbaglia. È il modo in cui farai i progetti di questo piano.'],
+  ];
+  const PHASES = [
+    { n: 0, name: 'Setup', w: [1, 1] }, { n: 1, name: 'Esplorazione', w: [1, 8] },
+    { n: 2, name: 'Specializzazione', w: [9, 30] }, { n: 3, name: 'Candidature', w: [31, 52] },
+  ];
+  const TRACK = { base: 'Partenza', dati: 'Dati & performance', operazioni: 'Operazioni & logistica', pista: 'Pista, timing & gara', trasversale: 'Trasversale', candidature: 'Candidature' };
+  const KIND = { studio: 'Studio', progetto: 'Progetto', azione: 'Azione', checkpoint: 'Checkpoint', 'lezione-claude': 'Lezione con Claude' };
+  const SCORE_FIELDS = [['interest', 'Interesse'], ['energy', 'Energia'], ['aptitude', 'Attitudine'], ['market', 'Mercato']];
+  const DEFAULT_SETTINGS = { startDate: '2026-11-10', weeklyHours: 7, budget: 300, chosenBranch: null };
+
+  // ---------- pure helpers ----------
+  const dayNum = (iso) => { const [y, m, d] = iso.split('-').map(Number); return Date.UTC(y, m - 1, d) / 864e5; };
+  const isoOf = (n) => new Date(n * 864e5).toISOString().slice(0, 10);
+  function weekOf(startDate, today) {
+    const w = Math.floor((dayNum(today) - dayNum(startDate)) / 7) + 1;
+    return Math.min(52, Math.max(1, w));
+  }
+  function validHours(v) {
+    const s = String(v ?? '').trim().replace(',', '.');
+    if (!/^\d+(\.\d+)?$/.test(s)) return false;
+    const n = Number(s);
+    return n > 0 && n <= 24;
+  }
+  const isLocked = (t, settings) => t.phase === 2 && t.track !== 'trasversale' && t.track !== settings.chosenBranch;
+  function stats(tasks, logs, settings, today) {
+    const week = weekOf(settings.startDate, today);
+    const active = tasks.filter(t => !isLocked(t, settings));
+    const done = active.filter(t => t.status === 'done');
+    const hoursWeek = logs.filter(l => weekOf(settings.startDate, l.date) === week).reduce((s, l) => s + Number(l.hours || 0), 0);
+    const hoursTotal = logs.reduce((s, l) => s + Number(l.hours || 0), 0);
+    const spent = tasks.filter(t => t.status === 'done').reduce((s, t) => s + Number(t.cost || 0), 0);
+    const nextCheckpoint = active.filter(t => t.kind === 'checkpoint' && t.status !== 'done').sort((a, b) => a.week - b.week)[0] || null;
+    return { week, doneCount: done.length, total: active.length, hoursWeek, hoursTotal, spent, nextCheckpoint };
+  }
+  function localToday() {
+    if (window.__TODAY__) return window.__TODAY__;
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+  window.Planner = { weekOf, validHours, stats };
+
+  // ---------- state ----------
+  const S = { db: null, tasks: [], logs: [], scores: {}, inbox: [], settings: { ...DEFAULT_SETTINGS }, settingsExists: false, loaded: false, open: new Set() };
+  const $ = (id) => document.getElementById(id);
+  function h(tag, attrs = {}, ...kids) {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (v == null || v === false) continue;
+      if (k === 'class') el.className = v; else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+      else if (k === 'text') el.textContent = v; else el.setAttribute(k, v === true ? '' : v);
+    }
+    for (const c of kids.flat()) if (c != null && c !== false) el.append(c.nodeType ? c : document.createTextNode(String(c)));
+    return el;
+  }
+  const fmtH = (n) => (Math.round(n * 100) / 100).toString().replace('.', ',');
+  const fmtDate = (iso) => { const [y, m, d] = iso.split('-'); return `${d}/${m}/${y.slice(2)}`; };
+  const weekRange = (w) => { const s = dayNum(S.settings.startDate) + (w - 1) * 7; return [isoOf(s), isoOf(s + 6)]; };
+  let toastTimer;
+  function toast(msg) {
+    let el = document.querySelector('.toast');
+    if (!el) { el = h('div', { class: 'toast', role: 'status' }); document.body.append(el); }
+    el.textContent = msg; el.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.hidden = true; }, 3200);
+  }
+  async function write(fn, okMsg) {
+    if (!S.db) { toast('Qui non posso salvare: apri la pagina su claude.ai.'); return false; }
+    try { await fn(S.db); if (okMsg) toast(okMsg); return true; }
+    catch (e) {
+      const code = e && e.code;
+      toast(code === 'invalid_argument' ? 'Non hai i permessi per modificare questo piano.' : code === 'quota_exceeded' ? 'Il database è pieno: chiedi a Claude di fare pulizia.' : 'Salvataggio non riuscito. Riprova tra poco.');
+      return false;
+    }
+  }
+
+  // ---------- task rendering ----------
+  function taskItem(t, week) {
+    const locked = isLocked(t, S.settings);
+    const done = t.status === 'done';
+    const late = !done && !locked && t.weekEnd < week;
+    const li = h('li', { class: `task${done ? ' done' : ''}${locked ? ' locked' : ''}${t.kind === 'checkpoint' ? ' checkpoint' : ''}`, 'data-task-id': t.id });
+    const box = h('input', { type: 'checkbox', class: 'task-check', id: `chk-${t.id}`, 'aria-label': `Fatto: ${t.title}`, disabled: locked || !S.db });
+    box.checked = done;
+    box.addEventListener('change', async () => {
+      const ok = await write(db => db.doc('tasks/' + t.id).update(box.checked ? { status: 'done', doneAt: localToday() } : { status: 'todo', doneAt: null }));
+      if (!ok) box.checked = !box.checked;
+    });
+    li.append(h('div', { class: 't-row' }, box, h('label', { class: 't-title', for: `chk-${t.id}`, text: t.title })));
+    const wk = t.week === t.weekEnd ? `S${t.week}` : `S${t.week}–${t.weekEnd}`;
+    li.append(h('div', { class: 't-meta' },
+      h('span', { class: `k-${t.kind}`, text: KIND[t.kind] || t.kind }),
+      h('span', { class: 'mono', text: wk }),
+      h('span', { text: TRACK[t.track] || t.track }),
+      t.cost ? h('span', { class: 'mono', text: `${t.cost} €` }) : h('span', { text: 'gratis' }),
+      locked ? h('span', { text: 'si sblocca al checkpoint 2' }) : null,
+      late ? h('span', { class: 'late', text: 'in ritardo' }) : null,
+      done && t.doneAt ? h('span', { text: `fatto il ${fmtDate(t.doneAt)}` }) : null));
+    const more = h('details', { class: 't-more' }, h('summary', { text: 'Dettagli e note' }));
+    if (S.open.has(t.id)) more.open = true;
+    more.addEventListener('toggle', () => { more.open ? S.open.add(t.id) : S.open.delete(t.id); });
+    more.append(h('p', { class: 't-detail', text: t.detail || '' }));
+    if (t.url) more.append(h('a', { href: t.url, target: '_blank', rel: 'noopener', class: 'small', text: 'Apri la risorsa ↗' }));
+    const note = h('textarea', { id: `note-${t.id}`, placeholder: 'Le tue note su questo compito (le leggo anch\'io)', disabled: !S.db });
+    note.value = t.note || '';
+    note.addEventListener('change', () => write(db => db.doc('tasks/' + t.id).update({ note: note.value }), 'Nota salvata'));
+    more.append(note);
+    li.append(more);
+    return li;
+  }
+
+  function renderTasks() {
+    const today = localToday();
+    const st = stats(S.tasks, S.logs, S.settings, today);
+    const week = st.week;
+    const [a, b] = weekRange(week);
+    $('week-range').textContent = `${fmtDate(a)} – ${fmtDate(b)}`;
+    const sorted = [...S.tasks].sort((x, y) => x.week - y.week || x.phase - y.phase || x.id.localeCompare(y.id));
+    const visible = sorted.filter(t => !isLocked(t, S.settings));
+    const nowList = visible.filter(t => t.week <= week && week <= t.weekEnd);
+    const late = visible.filter(t => t.weekEnd < week && t.status !== 'done');
+    $('week-tasks').replaceChildren(...(nowList.length ? nowList.map(t => taskItem(t, week)) : [h('li', { class: 'note', text: S.tasks.length ? 'Nessun compito in programma questa settimana.' : 'I compiti compariranno qui.' })]));
+    $('late-wrap').hidden = !late.length;
+    $('late-tasks').replaceChildren(...late.map(t => taskItem(t, week)));
+    // log task select
+    const sel = $('log-task'); const cur = sel.value;
+    sel.replaceChildren(h('option', { value: '', text: 'Nessuno in particolare' }), ...[...nowList, ...late].map(t => h('option', { value: t.id, text: t.title })));
+    sel.value = [...sel.options].some(o => o.value === cur) ? cur : '';
+    // roadmap
+    const curPhase = week === 1 ? 0 : week <= 8 ? 1 : week <= 30 ? 2 : 3;
+    $('phase-strip').replaceChildren(...PHASES.map(p => {
+      const ts = S.tasks.filter(t => t.phase === p.n && !isLocked(t, S.settings));
+      const pct = ts.length ? Math.round(100 * ts.filter(t => t.status === 'done').length / ts.length) : 0;
+      return h('div', { class: `ph${p.n === curPhase ? ' now' : ''}`, title: `${p.name}: ${pct}% fatto` },
+        h('div', { class: 'seg' }, h('i', { style: `width:${pct}%` })), h('span', { class: 'cap', text: `${p.name} · S${p.w[0]}${p.w[1] !== p.w[0] ? '–' + p.w[1] : ''}` }));
+    }));
+    $('phase-list').replaceChildren(...PHASES.map(p => {
+      const ts = sorted.filter(t => t.phase === p.n);
+      const act = ts.filter(t => !isLocked(t, S.settings));
+      const det = h('details', { class: 'phase' });
+      if (S.open.has('phase-' + p.n)) det.open = true;
+      det.addEventListener('toggle', () => { det.open ? S.open.add('phase-' + p.n) : S.open.delete('phase-' + p.n); });
+      det.append(h('summary', {}, h('h3', { text: `Fase ${p.n} · ${p.name}` }),
+        h('span', { class: 'small muted mono', text: `S${p.w[0]}–${p.w[1]} · ${act.filter(t => t.status === 'done').length}/${act.length} fatti` })));
+      const body = h('div');
+      const groups = [...new Set(ts.map(t => t.track))];
+      for (const g of groups) {
+        const gt = ts.filter(t => t.track === g);
+        const lockedGroup = gt.every(t => isLocked(t, S.settings));
+        body.append(h('p', { class: 'group-title', text: TRACK[g] + (lockedGroup ? (S.settings.chosenBranch ? ' · non scelta' : ' · da scegliere al checkpoint 2') : '') }),
+          h('ul', { class: 'tasks' }, gt.map(t => taskItem(t, week))));
+      }
+      det.append(body);
+      return det;
+    }));
+    renderSummary(st);
+  }
+
+  function renderSummary(st) {
+    const target = Number(S.settings.weeklyHours) || 7;
+    const budget = Number(S.settings.budget) || 300;
+    $('week-label').textContent = `Settimana ${st.week} di 52`;
+    const ph = st.week === 1 ? 'Fase 0–1 · Setup ed esplorazione' : st.week <= 8 ? 'Fase 1 · Esplorazione' : st.week <= 30 ? 'Fase 2 · Specializzazione' : 'Fase 3 · Candidature';
+    $('phase-label').textContent = ph;
+    $('cp-label').textContent = st.nextCheckpoint ? `Prossimo checkpoint: S${st.nextCheckpoint.week}` : 'Nessun checkpoint aperto';
+    $('cp-label').classList.toggle('crit', !!st.nextCheckpoint && st.nextCheckpoint.week < st.week);
+    $('hours-week').textContent = fmtH(st.hoursWeek);
+    $('hours-target').textContent = `/ ${fmtH(target)} h`;
+    $('hours-bar').style.width = Math.min(100, 100 * st.hoursWeek / target) + '%';
+    $('hours-total').textContent = `${fmtH(st.hoursTotal)} h`;
+    const avg = st.hoursTotal / st.week;
+    $('hours-pace').textContent = `media ${fmtH(Math.round(avg * 10) / 10)} h/sett · obiettivo ${fmtH(target)}`;
+    $('done-count').textContent = st.doneCount;
+    $('done-total').textContent = `/ ${st.total}`;
+    $('done-bar').style.width = (st.total ? 100 * st.doneCount / st.total : 0) + '%';
+    $('spent').textContent = st.spent;
+    $('spent-bar').style.width = Math.min(100, 100 * st.spent / budget) + '%';
+    renderChart(st.week, target);
+  }
+
+  // ---------- log ----------
+  function renderChart(week, target) {
+    const from = Math.max(1, week - 7);
+    const weeks = []; for (let w = from; w <= week; w++) weeks.push(w);
+    const vals = weeks.map(w => S.logs.filter(l => weekOf(S.settings.startDate, l.date) === w).reduce((s, l) => s + Number(l.hours || 0), 0));
+    const max = Math.max(target * 1.25, ...vals, 1);
+    const W = 320, H = 132, L = 22, B = 18, T = 14, R = 6;
+    const ph = H - B - T, slot = (W - L - R) / 8, bw = Math.min(22, slot * 0.55);
+    const y = v => T + ph - (v / max) * ph;
+    const ns = 'http://www.w3.org/2000/svg';
+    const el = (n, a, txt) => { const e = document.createElementNS(ns, n); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; };
+    const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `Ore studiate nelle ultime ${weeks.length} settimane` });
+    const ticks = [0, Math.round(max / 2), Math.round(max)];
+    for (const t of ticks) { svg.append(el('line', { class: 'grid', x1: L, x2: W - R, y1: y(t), y2: y(t) }), el('text', { x: L - 4, y: y(t) + 3, 'text-anchor': 'end' }, t)); }
+    weeks.forEach((w, i) => {
+      const cx = L + slot * i + slot / 2, v = vals[i];
+      const hgt = Math.max(0, (v / max) * ph), x = cx - bw / 2, top = T + ph - hgt;
+      if (hgt > 0) {
+        const r = Math.min(4, hgt, bw / 2);
+        const p = el('path', { class: `b${w === week ? ' cur' : ''}`, d: `M${x},${T + ph} V${top + r} Q${x},${top} ${x + r},${top} H${x + bw - r} Q${x + bw},${top} ${x + bw},${top + r} V${T + ph} Z` });
+        p.append(el('title', {}, `Settimana ${w}: ${fmtH(v)} h`));
+        svg.append(p);
+      }
+      svg.append(el('text', { x: cx, y: H - 4, 'text-anchor': 'middle' }, `S${w}`));
+      if (w === week) svg.append(el('text', { class: 'lbl', x: cx, y: Math.max(10, top - 4), 'text-anchor': 'middle' }, `${fmtH(v)} h`));
+    });
+    svg.append(el('line', { class: 'target', x1: L, x2: W - R, y1: y(target), y2: y(target) }));
+    $('hours-chart').replaceChildren(svg);
+  }
+  function renderLogs() {
+    const list = [...S.logs].sort((a, b) => (b.date + (b.createdAt || '')).localeCompare(a.date + (a.createdAt || ''))).slice(0, 8);
+    const title = id => (S.tasks.find(t => t.id === id) || {}).title;
+    $('log-entries').replaceChildren(...(list.length ? list.map(l => h('li', {},
+      h('span', { class: 'mono muted', text: fmtDate(l.date) }), h('span', { class: 'mono', text: `${fmtH(Number(l.hours))} h` }),
+      h('span', { text: [title(l.taskId), l.note].filter(Boolean).join(' · ') || '—' })))
+      : [h('li', { class: 'muted', style: 'grid-template-columns:1fr', text: 'Nessuna voce ancora. La prima: quanto hai studiato oggi?' })]));
+  }
+  $('log-date').value = localToday();
+  $('log-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const hours = $('log-hours').value;
+    const date = $('log-date').value || localToday();
+    if (!validHours(hours) || !/^\d{4}-\d{2}-\d{2}$/.test(date)) { $('log-error').hidden = false; return; }
+    $('log-error').hidden = true;
+    const entry = { date, hours: Number(String(hours).trim().replace(',', '.')), note: $('log-note').value.trim(), taskId: $('log-task').value || null, createdAt: new Date().toISOString() };
+    if (await write(db => db.collection('logs').add(entry), 'Salvato nel registro')) { $('log-hours').value = ''; $('log-note').value = ''; }
+  });
+
+  // ---------- scorecard ----------
+  const scoreTimers = {};
+  function renderScores() {
+    if ($('scores').contains(document.activeElement)) return; // don't rebuild under the viewer's hands
+    const ids = ['dati', 'operazioni', 'pista'];
+    const totals = ids.map(id => SCORE_FIELDS.reduce((s, [f]) => s + Number((S.scores[id] || {})[f] || 0), 0));
+    const best = Math.max(...totals);
+    $('scores').replaceChildren(...ids.map((id, i) => {
+      const sc = { interest: 0, energy: 0, aptitude: 0, market: 0, note: '', ...(S.scores[id] || {}) };
+      const card = h('div', { class: `panel score${best > 0 && totals[i] === best ? ' lead' : ''}` });
+      const tot = h('span', { class: 'tot', text: `${totals[i]}/20` });
+      card.append(h('div', { class: 'sec-head' }, h('h3', { text: TRACK[id] }), tot));
+      const save = () => {
+        clearTimeout(scoreTimers[id]);
+        scoreTimers[id] = setTimeout(() => write(db => db.doc('scores/' + id).set({ ...sc })), 600);
+      };
+      for (const [f, label] of SCORE_FIELDS) {
+        const out = h('span', { class: 'mono', text: sc[f] });
+        const r = h('input', { type: 'range', min: 0, max: 5, step: 1, id: `score-${id}-${f}`, 'aria-label': `${label} per ${TRACK[id]}`, disabled: !S.db });
+        r.value = sc[f];
+        r.addEventListener('input', () => { sc[f] = Number(r.value); out.textContent = r.value; tot.textContent = `${SCORE_FIELDS.reduce((s, [k]) => s + sc[k], 0)}/20`; save(); });
+        card.append(h('label', { class: 'slider' }, h('span', { text: label }), r, out));
+      }
+      const note = h('textarea', { id: `score-note-${id}`, placeholder: 'Cosa ti è piaciuto, cosa no', disabled: !S.db });
+      note.value = sc.note || '';
+      note.addEventListener('change', () => { sc.note = note.value; save(); });
+      card.append(note);
+      return card;
+    }));
+  }
+  $('branch-select').addEventListener('change', async (e) => {
+    const v = e.target.value || null;
+    await write(db => S.settingsExists ? db.doc('settings/main').update({ chosenBranch: v }) : db.doc('settings/main').set({ ...S.settings, chosenBranch: v }),
+      v ? `Fase 2 attivata: ${TRACK[v]}` : 'Scelta azzerata');
+  });
+
+  // ---------- inbox ----------
+  function renderInbox() {
+    const list = [...S.inbox].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+    const label = { nuovo: 'In attesa di Claude', letto: 'Letto da Claude', risposto: 'Risposto' };
+    $('inbox-list').replaceChildren(...list.map(m => h('li', { class: 'panel' },
+      h('div', { class: 'sec-head' }, h('span', { class: 'small muted mono', text: String(m.createdAt || '').slice(0, 10).split('-').reverse().join('/') }),
+        h('span', { class: `pill${m.status === 'risposto' ? ' accent' : ''}`, text: label[m.status] || m.status })),
+      h('p', { text: m.text }), m.reply ? h('p', { class: 'reply', text: m.reply }) : null)));
+  }
+  $('inbox-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const text = $('inbox-text').value.trim();
+    if (!text) return;
+    if (await write(db => db.collection('inbox').add({ text, createdAt: new Date().toISOString(), status: 'nuovo', reply: '' }), 'Inviato. Lo leggo alla prossima sessione.')) $('inbox-text').value = '';
+  });
+
+  // ---------- reference sections ----------
+  $('roles').replaceChildren(...ROLES.map(([r, what, where, travel, fit, src]) => h('tr', {},
+    h('td', {}, h('strong', { text: r })), h('td', { text: what }), h('td', { text: where }), h('td', { text: travel }),
+    h('td', { class: 'fit', text: fit }), h('td', {}, h('a', { href: src, target: '_blank', rel: 'noopener', text: 'fonte ↗' })))));
+  $('compass').replaceChildren(...COMPASS.map(([t, d]) => h('div', { class: 'panel' }, h('h3', { text: t }), h('p', { class: 'muted', text: d }))));
+
+  function renderAll() { renderTasks(); renderLogs(); renderScores(); renderInbox(); $('branch-select').value = S.settings.chosenBranch || ''; }
+  renderAll();
+
+  // ---------- data ----------
+  async function start() {
+    let db = null;
+    try { db = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch { db = null; }
+    if (!db) { $('offline-note').hidden = false; renderAll(); return; }
+    S.db = db;
+    const loadTimer = setTimeout(() => { if (!S.loaded) $('load-note').hidden = false; }, 10000);
+    const fail = () => { clearTimeout(loadTimer); $('load-note').hidden = false; };
+    const docs = snap => snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    db.collection('tasks').onSnapshot(snap => {
+      S.tasks = docs(snap);
+      if (!snap.metadata.fromCache) { S.loaded = true; clearTimeout(loadTimer); $('load-note').hidden = true; $('empty-state').hidden = !snap.empty; }
+      renderTasks(); renderLogs();
+    }, fail);
+    db.collection('logs').onSnapshot(snap => { S.logs = docs(snap).filter(l => l.date); renderLogs(); renderSummary(stats(S.tasks, S.logs, S.settings, localToday())); }, fail);
+    db.collection('scores').onSnapshot(snap => { S.scores = Object.fromEntries(snap.docs.map(d => [d.id, d.data()])); renderScores(); }, fail);
+    db.collection('inbox').onSnapshot(snap => { S.inbox = docs(snap); renderInbox(); }, fail);
+    db.doc('settings/main').onSnapshot(snap => {
+      S.settingsExists = snap.exists;
+      S.settings = { ...DEFAULT_SETTINGS, ...(snap.exists ? snap.data() : {}) };
+      $('branch-select').value = S.settings.chosenBranch || '';
+      renderTasks();
+    }, fail);
+  }
+  start();
+})();
+</script>
