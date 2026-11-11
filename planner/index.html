@@ -3,7 +3,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
 <style>
-/* Layout: a timing-screen summary on top, then one column of working sections (week, log, roadmap, scorecard, messages, reference). */
+/* Layout: a timing-screen summary on top, then next task, lesson, check-in, week, roadmap, scorecard, messages, reference. */
 :root {
   --bg: #F1F3F6; --surface: #FFFFFF; --sunk: #E7EBF0; --ink: #12161B; --muted: #566270; --line: #D8DEE5;
   --accent: #1450C8; --accent-ink: #FFFFFF; --accent-soft: #E3EBFB;
@@ -88,24 +88,23 @@ button { font: 600 14px/1 var(--f-body); border: 0; border-radius: var(--r); pad
 button:hover { filter: brightness(1.08); }
 button.ghost { background: var(--sunk); color: var(--ink); }
 
-/* log */
-.log-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
-@media (max-width: 760px) { .log-grid { grid-template-columns: minmax(0, 1fr); } }
-form.log { display: grid; gap: 10px; }
-.fields { display: grid; grid-template-columns: minmax(0, 1fr) 96px; gap: 10px; }
-label.f { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
-.err { color: var(--crit); font-size: 13px; }
-.chart svg { width: 100%; height: auto; display: block; }
-.chart text { fill: var(--muted); font: 10px var(--f-mono); }
-.chart .lbl { fill: var(--ink); font-weight: 500; }
-.chart .grid { stroke: var(--line); stroke-width: 1; }
-.chart .target { stroke: var(--warn); stroke-width: 1.5; stroke-dasharray: 4 3; }
-.chart .b { fill: var(--accent); }
-.chart .b.cur { fill: var(--best); }
-ol.entries { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 14px; }
-ol.entries li { display: grid; grid-template-columns: 88px 44px minmax(0, 1fr); gap: 10px; padding: 6px 0; border-top: 1px solid var(--line); }
-ol.entries li > span:last-child { overflow-wrap: anywhere; }
-
+/* next task, lesson, check-in */
+.next { background: var(--surface); border: 1px solid var(--line); border-left: 6px solid var(--best); border-radius: var(--r); padding: 16px; display: grid; gap: 10px; min-width: 0; }
+.next .n-title { font: 700 24px/1.15 var(--f-display); text-transform: uppercase; overflow-wrap: anywhere; }
+.next .n-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.pace-good { color: var(--good); } .pace-warn { color: var(--warn); } .pace-crit { color: var(--crit); }
+.lesson { background: var(--surface); border: 1px solid var(--best); border-radius: var(--r); padding: 16px; display: grid; gap: 12px; min-width: 0; }
+.lesson-body { display: grid; gap: 8px; font-size: 15px; overflow-wrap: anywhere; max-height: 70vh; overflow-y: auto; padding-right: 4px; }
+.lesson-body h4 { font: 700 18px/1.2 var(--f-display); text-transform: uppercase; margin: 8px 0 0; }
+.lesson-body ul, .lesson-body ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.lesson-body code { font-family: var(--f-mono); font-size: 13px; background: var(--sunk); padding: 1px 4px; border-radius: 3px; }
+.lesson-body .q { border-left: 3px solid var(--accent); padding: 4px 0 4px 10px; color: var(--muted); font-weight: 600; }
+.ask { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+@media (max-width: 520px) { .ask { grid-template-columns: minmax(0, 1fr); } }
+button.lesson-btn { padding: 6px 10px; font-size: 13px; background: var(--best); color: var(--accent-ink); }
+.t-actions { padding-left: 30px; }
+.checkin { display: grid; gap: 10px; }
+.checkin ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 14px; }
 /* roadmap */
 .phases { display: grid; grid-template-columns: 5fr 8fr 20fr 20fr; gap: 3px; }
 .ph { display: grid; gap: 4px; min-width: 0; }
@@ -160,9 +159,9 @@ th { font: 600 12px/1.2 var(--f-body); text-transform: uppercase; letter-spacing
       </div>
     </div>
     <div class="tower" aria-label="Riepilogo">
-      <div><span class="eyebrow">Ore questa settimana</span><span class="val"><span id="hours-week">0</span> <small id="hours-target">/ 7 h</small></span><div class="bar"><i id="hours-bar" style="width:0%"></i></div></div>
-      <div><span class="eyebrow">Ore totali</span><span class="val" id="hours-total">0 h</span><span class="small muted" id="hours-pace">obiettivo 7 h a settimana</span></div>
-      <div><span class="eyebrow">Compiti fatti</span><span class="val"><span id="done-count">0</span> <small id="done-total">/ 0</small></span><div class="bar"><i id="done-bar" style="width:0%"></i></div></div>
+      <div><span class="eyebrow">Task della settimana</span><span class="val"><span id="week-done">0</span> <small id="week-total">/ 0</small></span><div class="bar"><i id="week-bar" style="width:0%"></i></div></div>
+      <div><span class="eyebrow">Ritmo</span><span class="val" id="pace-label">–</span><span class="small muted" id="pace-detail"></span></div>
+      <div><span class="eyebrow">Completamento</span><span class="val"><span id="done-count">0</span> <small id="done-total">/ 0</small></span><div class="bar"><i id="done-bar" style="width:0%"></i></div></div>
       <div><span class="eyebrow">Budget corsi</span><span class="val"><span id="spent">0</span> <small>/ 300 €</small></span><div class="bar"><i id="spent-bar" style="width:0%"></i></div></div>
     </div>
     <p class="note" id="offline-note" hidden>Il piano e i tuoi progressi si aprono solo dentro claude.ai. Qui vedi la mappa dei ruoli e la bussola, ma non puoi salvare.</p>
@@ -170,33 +169,39 @@ th { font: 600 12px/1.2 var(--f-body); text-transform: uppercase; letter-spacing
     <p class="note" id="empty-state" hidden>Il piano non è ancora caricato. Appena Claude lo inserisce qui compaiono i compiti della settimana, la roadmap e la scorecard.</p>
   </header>
 
+  <section aria-labelledby="h-next">
+    <div class="sec-head"><h2 id="h-next">Prossimo task</h2><span class="small muted">Il più vecchio ancora aperto</span></div>
+    <div id="next-task"></div>
+  </section>
+
+  <section aria-labelledby="h-lesson" id="lesson-panel" hidden>
+    <div class="lesson">
+      <div class="sec-head"><h2 id="h-lesson">Lezione</h2><button type="button" class="ghost" id="lesson-close">Chiudi</button></div>
+      <h3 id="lesson-title"></h3>
+      <div class="lesson-body" id="lesson-body" aria-live="polite"></div>
+      <p class="small muted" id="lesson-status"></p>
+      <div class="ask">
+        <input type="text" id="lesson-q" placeholder="Una domanda su questa lezione">
+        <button type="button" id="lesson-ask">Chiedi</button>
+      </div>
+      <div class="n-actions" style="display:flex;flex-wrap:wrap;gap:8px">
+        <button type="button" class="ghost" id="lesson-stop" hidden>Ferma</button>
+        <button type="button" class="ghost" id="lesson-done">Segna la lezione come fatta</button>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-checkin">
+    <div class="sec-head"><h2 id="h-checkin">Ultimo check-in di Claude</h2><span class="small muted">Ogni lunedì alle 8:47</span></div>
+    <div class="panel checkin" id="checkin"><p class="muted">Il primo check-in arriva lunedì 16 novembre: sposterò i task in ritardo e ti lascerò qui il riepilogo.</p></div>
+  </section>
+
   <section aria-labelledby="h-week">
     <div class="sec-head"><h2 id="h-week">Questa settimana</h2><span class="small muted" id="week-range"></span></div>
     <ul class="tasks" id="week-tasks"></ul>
     <div id="late-wrap" hidden>
       <p class="group-title" style="margin-bottom:8px">Rimasti indietro</p>
       <ul class="tasks" id="late-tasks"></ul>
-    </div>
-  </section>
-
-  <section aria-labelledby="h-log">
-    <div class="sec-head"><h2 id="h-log">Registro progressi</h2><span class="small muted">Lo leggo a ogni sessione per adattare il piano</span></div>
-    <div class="log-grid">
-      <form class="log panel" id="log-form" novalidate>
-        <div class="fields">
-          <label class="f">Data<input type="date" id="log-date"></label>
-          <label class="f">Ore<input type="text" inputmode="decimal" id="log-hours" placeholder="1,5"></label>
-        </div>
-        <label class="f">Compito (facoltativo)<select id="log-task"><option value="">Nessuno in particolare</option></select></label>
-        <label class="f">Cosa hai fatto, cosa è stato difficile<textarea id="log-note" placeholder="Fatto il test EF SET: B2 alto. Ascolto ok, scrittura lenta."></textarea></label>
-        <p class="err" id="log-error" hidden>Scrivi le ore come numero tra 0,25 e 24, per esempio 1,5.</p>
-        <div><button type="submit" id="log-submit">Salva nel registro</button></div>
-      </form>
-      <div class="panel chart" style="display:grid;gap:10px">
-        <div class="sec-head"><h3>Ore per settimana</h3><span class="small muted">linea tratteggiata = obiettivo</span></div>
-        <div id="hours-chart"></div>
-        <ol class="entries" id="log-entries"></ol>
-      </div>
     </div>
   </section>
 
@@ -242,8 +247,9 @@ th { font: 600 12px/1.2 var(--f-body); text-transform: uppercase; letter-spacing
     <div class="compass" id="compass"></div>
   </section>
 
-  <p class="small muted">Come funziona: quello che spunti e scrivi qui viene salvato nel database della pagina. Claude lo legge dalla sessione e può aggiungere compiti, spostare scadenze e rispondere ai messaggi.</p>
+  <p class="small muted">Come funziona: quello che spunti e scrivi qui viene salvato nel database della pagina. Claude lo legge ogni lunedì e quando glielo chiedi: sposta le scadenze, aggiunge task e risponde ai messaggi.</p>
 </div>
+
 
 <script>
 (() => {
@@ -271,7 +277,8 @@ th { font: 600 12px/1.2 var(--f-body); text-transform: uppercase; letter-spacing
   const TRACK = { base: 'Partenza', dati: 'Dati & performance', operazioni: 'Operazioni & logistica', pista: 'Pista, timing & gara', trasversale: 'Trasversale', candidature: 'Candidature' };
   const KIND = { studio: 'Studio', progetto: 'Progetto', azione: 'Azione', checkpoint: 'Checkpoint', 'lezione-claude': 'Lezione con Claude' };
   const SCORE_FIELDS = [['interest', 'Interesse'], ['energy', 'Energia'], ['aptitude', 'Attitudine'], ['market', 'Mercato']];
-  const DEFAULT_SETTINGS = { startDate: '2026-11-10', weeklyHours: 7, budget: 300, chosenBranch: null };
+  const DEFAULT_SETTINGS = { startDate: '2026-11-10', budget: 300, chosenBranch: null };
+  const PROFILE = 'Riccardo: data consultant in SDG Group (Milano). Due anni su dati SAP (S/4HANA, BW, Datasphere, BusinessObjects) per Luxottica e Satisloh, ora piattaforma dati AWS (S3, Glue, Iceberg) e flussi dati dei concessionari per Ducati. Laurea triennale in Ingegneria Informatica al Politecnico di Milano, inglese C1. Non ama scrivere codice da solo: usa l\'AI. Vuole entrare nel motorsport auto; i ruoli che lo attirano di più sono data engineer e race strategist, è curioso del ruolo di ufficiale di gara ACI.';
 
   // ---------- pure helpers ----------
   const dayNum = (iso) => { const [y, m, d] = iso.split('-').map(Number); return Date.UTC(y, m - 1, d) / 864e5; };
@@ -280,32 +287,38 @@ th { font: 600 12px/1.2 var(--f-body); text-transform: uppercase; letter-spacing
     const w = Math.floor((dayNum(today) - dayNum(startDate)) / 7) + 1;
     return Math.min(52, Math.max(1, w));
   }
-  function validHours(v) {
-    const s = String(v ?? '').trim().replace(',', '.');
-    if (!/^\d+(\.\d+)?$/.test(s)) return false;
-    const n = Number(s);
-    return n > 0 && n <= 24;
-  }
   const isLocked = (t, settings) => t.phase === 2 && t.track !== 'trasversale' && t.track !== settings.chosenBranch;
-  function stats(tasks, logs, settings, today) {
+  const order = (a, b) => a.weekEnd - b.weekEnd || a.week - b.week || String(a.id).localeCompare(String(b.id));
+  function pace(tasks, settings, today) {
     const week = weekOf(settings.startDate, today);
     const active = tasks.filter(t => !isLocked(t, settings));
-    const done = active.filter(t => t.status === 'done');
-    const hoursWeek = logs.filter(l => weekOf(settings.startDate, l.date) === week).reduce((s, l) => s + Number(l.hours || 0), 0);
-    const hoursTotal = logs.reduce((s, l) => s + Number(l.hours || 0), 0);
+    const late = active.filter(t => t.status !== 'done' && t.weekEnd < week).length;
+    const ahead = active.filter(t => t.status === 'done' && t.week > week).length;
+    const label = late >= 3 ? 'in ritardo' : late >= 1 ? 'leggero ritardo' : ahead > 0 ? 'in anticipo' : 'in linea';
+    return { late, ahead, label };
+  }
+  function nextTask(tasks, settings) {
+    return tasks.filter(t => !isLocked(t, settings) && t.status !== 'done').sort(order)[0] || null;
+  }
+  function stats(tasks, settings, today) {
+    const week = weekOf(settings.startDate, today);
+    const active = tasks.filter(t => !isLocked(t, settings));
+    const thisWeek = active.filter(t => t.week <= week && week <= t.weekEnd);
     const spent = tasks.filter(t => t.status === 'done').reduce((s, t) => s + Number(t.cost || 0), 0);
     const nextCheckpoint = active.filter(t => t.kind === 'checkpoint' && t.status !== 'done').sort((a, b) => a.week - b.week)[0] || null;
-    return { week, doneCount: done.length, total: active.length, hoursWeek, hoursTotal, spent, nextCheckpoint };
+    return { week, doneCount: active.filter(t => t.status === 'done').length, total: active.length,
+      weekDone: thisWeek.filter(t => t.status === 'done').length, weekTotal: thisWeek.length, spent, nextCheckpoint };
   }
   function localToday() {
     if (window.__TODAY__) return window.__TODAY__;
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
-  window.Planner = { weekOf, validHours, stats };
+  window.Planner = { weekOf, pace, nextTask, stats };
 
   // ---------- state ----------
-  const S = { db: null, tasks: [], logs: [], scores: {}, inbox: [], settings: { ...DEFAULT_SETTINGS }, settingsExists: false, loaded: false, open: new Set() };
+  const S = { db: null, sample: null, tasks: [], scores: {}, inbox: [], lessons: {}, checkins: [], settings: { ...DEFAULT_SETTINGS },
+    settingsExists: false, loaded: false, open: new Set(), lessonId: null, streaming: null };
   const $ = (id) => document.getElementById(id);
   function h(tag, attrs = {}, ...kids) {
     const el = document.createElement(tag);
@@ -317,8 +330,7 @@ th { font: 600 12px/1.2 var(--f-body); text-transform: uppercase; letter-spacing
     for (const c of kids.flat()) if (c != null && c !== false) el.append(c.nodeType ? c : document.createTextNode(String(c)));
     return el;
   }
-  const fmtH = (n) => (Math.round(n * 100) / 100).toString().replace('.', ',');
-  const fmtDate = (iso) => { const [y, m, d] = iso.split('-'); return `${d}/${m}/${y.slice(2)}`; };
+  const fmtDate = (iso) => { const [y, m, d] = String(iso).slice(0, 10).split('-'); return `${d}/${m}/${(y || '').slice(2)}`; };
   const weekRange = (w) => { const s = dayNum(S.settings.startDate) + (w - 1) * 7; return [isoOf(s), isoOf(s + 6)]; };
   let toastTimer;
   function toast(msg) {
@@ -336,20 +348,57 @@ th { font: 600 12px/1.2 var(--f-body); text-transform: uppercase; letter-spacing
       return false;
     }
   }
+  const markDone = (id, extra = {}) => write(db => db.doc('tasks/' + id).update({ status: 'done', doneAt: localToday(), ...extra }));
 
-  // ---------- task rendering ----------
-  function taskItem(t, week) {
+  // ---------- markdown-lite (safe: builds DOM, never innerHTML) ----------
+  function inline(text) {
+    const out = []; const re = /(\*\*[^*]+\*\*|`[^`]+`)/g; let last = 0, m;
+    while ((m = re.exec(text))) {
+      if (m.index > last) out.push(text.slice(last, m.index));
+      out.push(m[0][0] === '*' ? h('strong', { text: m[0].slice(2, -2) }) : h('code', { text: m[0].slice(1, -1) }));
+      last = m.index + m[0].length;
+    }
+    if (last < text.length) out.push(text.slice(last));
+    return out;
+  }
+  function renderMd(md) {
+    const nodes = []; let list = null; let para = [];
+    const flush = () => { if (para.length) { nodes.push(h('p', {}, inline(para.join(' ')))); para = []; } };
+    for (const raw of String(md).split('\n')) {
+      const line = raw.trim();
+      const head = line.match(/^#{1,4}\s+(.*)/), bullet = line.match(/^[-*•]\s+(.*)/), num = line.match(/^\d+[.)]\s+(.*)/);
+      if (!line) { flush(); list = null; continue; }
+      if (head) { flush(); list = null; nodes.push(h('h4', {}, inline(head[1]))); continue; }
+      if (bullet || num) {
+        flush(); const tag = num ? 'ol' : 'ul';
+        if (!list || list.tagName.toLowerCase() !== tag) { list = h(tag); nodes.push(list); }
+        list.append(h('li', {}, inline((bullet || num)[1]))); continue;
+      }
+      list = null; para.push(line);
+    }
+    flush();
+    return nodes;
+  }
+
+  // ---------- tasks ----------
+  function lessonButton(t, id) {
+    if (t.kind !== 'lezione-claude' || !S.sample || !S.db) return null;
+    const saved = S.lessons[t.id] && (S.lessons[t.id].turns || []).length > 1;
+    return h('button', { type: 'button', class: 'lesson-btn', id, onclick: () => openLesson(t.id), text: saved ? 'Rivedi la lezione' : 'Fai la lezione' });
+  }
+  function taskItem(t, week, ctx) {
     const locked = isLocked(t, S.settings);
     const done = t.status === 'done';
     const late = !done && !locked && t.weekEnd < week;
     const li = h('li', { class: `task${done ? ' done' : ''}${locked ? ' locked' : ''}${t.kind === 'checkpoint' ? ' checkpoint' : ''}`, 'data-task-id': t.id });
-    const box = h('input', { type: 'checkbox', class: 'task-check', id: `chk-${t.id}`, 'aria-label': `Fatto: ${t.title}`, disabled: locked || !S.db });
+    const boxId = `${ctx}-chk-${t.id}`;
+    const box = h('input', { type: 'checkbox', class: 'task-check', id: boxId, 'aria-label': `Fatto: ${t.title}`, disabled: locked || !S.db });
     box.checked = done;
     box.addEventListener('change', async () => {
       const ok = await write(db => db.doc('tasks/' + t.id).update(box.checked ? { status: 'done', doneAt: localToday() } : { status: 'todo', doneAt: null }));
       if (!ok) box.checked = !box.checked;
     });
-    li.append(h('div', { class: 't-row' }, box, h('label', { class: 't-title', for: `chk-${t.id}`, text: t.title })));
+    li.append(h('div', { class: 't-row' }, box, h('label', { class: 't-title', for: boxId, text: t.title })));
     const wk = t.week === t.weekEnd ? `S${t.week}` : `S${t.week}–${t.weekEnd}`;
     li.append(h('div', { class: 't-meta' },
       h('span', { class: `k-${t.kind}`, text: KIND[t.kind] || t.kind }),
@@ -358,13 +407,17 @@ th { font: 600 12px/1.2 var(--f-body); text-transform: uppercase; letter-spacing
       t.cost ? h('span', { class: 'mono', text: `${t.cost} €` }) : h('span', { text: 'gratis' }),
       locked ? h('span', { text: 'si sblocca al checkpoint 2' }) : null,
       late ? h('span', { class: 'late', text: 'in ritardo' }) : null,
+      t.movedFrom ? h('span', { text: `spostato da S${t.movedFrom}` }) : null,
       done && t.doneAt ? h('span', { text: `fatto il ${fmtDate(t.doneAt)}` }) : null));
+    const lb = locked ? null : lessonButton(t, ctx === 'week' ? `lesson-open-${t.id}` : `${ctx}-lesson-open-${t.id}`);
+    if (lb) li.append(h('div', { class: 't-actions' }, lb));
+    const key = ctx + ':' + t.id;
     const more = h('details', { class: 't-more' }, h('summary', { text: 'Dettagli e note' }));
-    if (S.open.has(t.id)) more.open = true;
-    more.addEventListener('toggle', () => { more.open ? S.open.add(t.id) : S.open.delete(t.id); });
+    if (S.open.has(key)) more.open = true;
+    more.addEventListener('toggle', () => { more.open ? S.open.add(key) : S.open.delete(key); });
     more.append(h('p', { class: 't-detail', text: t.detail || '' }));
     if (t.url) more.append(h('a', { href: t.url, target: '_blank', rel: 'noopener', class: 'small', text: 'Apri la risorsa ↗' }));
-    const note = h('textarea', { id: `note-${t.id}`, placeholder: 'Le tue note su questo compito (le leggo anch\'io)', disabled: !S.db });
+    const note = h('textarea', { id: `${ctx}-note-${t.id}`, placeholder: 'Le tue note su questo compito (le leggo anch\'io)', disabled: !S.db });
     note.value = t.note || '';
     note.addEventListener('change', () => write(db => db.doc('tasks/' + t.id).update({ note: note.value }), 'Nota salvata'));
     more.append(note);
@@ -372,9 +425,30 @@ th { font: 600 12px/1.2 var(--f-body); text-transform: uppercase; letter-spacing
     return li;
   }
 
+  function renderNext() {
+    const box = $('next-task');
+    const t = nextTask(S.tasks, S.settings);
+    if (box.contains(document.activeElement) && t && box.querySelector(`[data-next-id="${t.id}"]`)) return;
+    if (!t) { box.replaceChildren(h('p', { class: 'note', text: S.tasks.length ? 'Nessun task aperto: hai finito tutto quello che era in programma.' : 'Il prossimo task comparirà qui.' })); return; }
+    const week = weekOf(S.settings.startDate, localToday());
+    const note = h('input', { type: 'text', id: 'next-note', placeholder: 'Nota veloce (facoltativa): com\'è andata?', disabled: !S.db });
+    const doneBtn = h('button', { type: 'button', id: 'next-done', disabled: !S.db, text: 'Fatto',
+      onclick: async () => { doneBtn.disabled = true; const extra = note.value.trim() ? { note: [t.note, note.value.trim()].filter(Boolean).join('\n') } : {}; if (!(await markDone(t.id, extra))) doneBtn.disabled = false; else toast('Segnato come fatto'); } });
+    const wk = t.week === t.weekEnd ? `S${t.week}` : `S${t.week}–${t.weekEnd}`;
+    box.replaceChildren(h('div', { class: 'next', 'data-next-id': t.id },
+      h('div', { class: 't-meta', style: 'padding-left:0' },
+        h('span', { class: `k-${t.kind}`, text: KIND[t.kind] || t.kind }), h('span', { class: 'mono', text: wk }),
+        h('span', { text: TRACK[t.track] || t.track }), t.weekEnd < week ? h('span', { class: 'late', text: 'in ritardo' }) : null),
+      h('p', { class: 'n-title', text: t.title }),
+      h('p', { class: 't-detail', text: t.detail || '' }),
+      t.url ? h('a', { href: t.url, target: '_blank', rel: 'noopener', class: 'small', text: 'Apri la risorsa ↗' }) : null,
+      note,
+      h('div', { class: 'n-actions' }, doneBtn, lessonButton(t, 'next-lesson'))));
+  }
+
   function renderTasks() {
     const today = localToday();
-    const st = stats(S.tasks, S.logs, S.settings, today);
+    const st = stats(S.tasks, S.settings, today);
     const week = st.week;
     const [a, b] = weekRange(week);
     $('week-range').textContent = `${fmtDate(a)} – ${fmtDate(b)}`;
@@ -382,14 +456,9 @@ th { font: 600 12px/1.2 var(--f-body); text-transform: uppercase; letter-spacing
     const visible = sorted.filter(t => !isLocked(t, S.settings));
     const nowList = visible.filter(t => t.week <= week && week <= t.weekEnd);
     const late = visible.filter(t => t.weekEnd < week && t.status !== 'done');
-    $('week-tasks').replaceChildren(...(nowList.length ? nowList.map(t => taskItem(t, week)) : [h('li', { class: 'note', text: S.tasks.length ? 'Nessun compito in programma questa settimana.' : 'I compiti compariranno qui.' })]));
+    $('week-tasks').replaceChildren(...(nowList.length ? nowList.map(t => taskItem(t, week, 'week')) : [h('li', { class: 'note', text: S.tasks.length ? 'Nessun compito in programma questa settimana.' : 'I compiti compariranno qui.' })]));
     $('late-wrap').hidden = !late.length;
-    $('late-tasks').replaceChildren(...late.map(t => taskItem(t, week)));
-    // log task select
-    const sel = $('log-task'); const cur = sel.value;
-    sel.replaceChildren(h('option', { value: '', text: 'Nessuno in particolare' }), ...[...nowList, ...late].map(t => h('option', { value: t.id, text: t.title })));
-    sel.value = [...sel.options].some(o => o.value === cur) ? cur : '';
-    // roadmap
+    $('late-tasks').replaceChildren(...late.map(t => taskItem(t, week, 'late')));
     const curPhase = week === 1 ? 0 : week <= 8 ? 1 : week <= 30 ? 2 : 3;
     $('phase-strip').replaceChildren(...PHASES.map(p => {
       const ts = S.tasks.filter(t => t.phase === p.n && !isLocked(t, S.settings));
@@ -406,93 +475,123 @@ th { font: 600 12px/1.2 var(--f-body); text-transform: uppercase; letter-spacing
       det.append(h('summary', {}, h('h3', { text: `Fase ${p.n} · ${p.name}` }),
         h('span', { class: 'small muted mono', text: `S${p.w[0]}–${p.w[1]} · ${act.filter(t => t.status === 'done').length}/${act.length} fatti` })));
       const body = h('div');
-      const groups = [...new Set(ts.map(t => t.track))];
-      for (const g of groups) {
+      for (const g of [...new Set(ts.map(t => t.track))]) {
         const gt = ts.filter(t => t.track === g);
         const lockedGroup = gt.every(t => isLocked(t, S.settings));
         body.append(h('p', { class: 'group-title', text: TRACK[g] + (lockedGroup ? (S.settings.chosenBranch ? ' · non scelta' : ' · da scegliere al checkpoint 2') : '') }),
-          h('ul', { class: 'tasks' }, gt.map(t => taskItem(t, week))));
+          h('ul', { class: 'tasks' }, gt.map(t => taskItem(t, week, 'road'))));
       }
       det.append(body);
       return det;
     }));
+    renderNext();
     renderSummary(st);
   }
 
   function renderSummary(st) {
-    const target = Number(S.settings.weeklyHours) || 7;
     const budget = Number(S.settings.budget) || 300;
     $('week-label').textContent = `Settimana ${st.week} di 52`;
-    const ph = st.week === 1 ? 'Fase 0–1 · Setup ed esplorazione' : st.week <= 8 ? 'Fase 1 · Esplorazione' : st.week <= 30 ? 'Fase 2 · Specializzazione' : 'Fase 3 · Candidature';
-    $('phase-label').textContent = ph;
+    $('phase-label').textContent = st.week === 1 ? 'Fase 0–1 · Setup ed esplorazione' : st.week <= 8 ? 'Fase 1 · Esplorazione' : st.week <= 30 ? 'Fase 2 · Specializzazione' : 'Fase 3 · Candidature';
     $('cp-label').textContent = st.nextCheckpoint ? `Prossimo checkpoint: S${st.nextCheckpoint.week}` : 'Nessun checkpoint aperto';
     $('cp-label').classList.toggle('crit', !!st.nextCheckpoint && st.nextCheckpoint.week < st.week);
-    $('hours-week').textContent = fmtH(st.hoursWeek);
-    $('hours-target').textContent = `/ ${fmtH(target)} h`;
-    $('hours-bar').style.width = Math.min(100, 100 * st.hoursWeek / target) + '%';
-    $('hours-total').textContent = `${fmtH(st.hoursTotal)} h`;
-    const avg = st.hoursTotal / st.week;
-    $('hours-pace').textContent = `media ${fmtH(Math.round(avg * 10) / 10)} h/sett · obiettivo ${fmtH(target)}`;
+    $('week-done').textContent = st.weekDone;
+    $('week-total').textContent = `/ ${st.weekTotal}`;
+    $('week-bar').style.width = (st.weekTotal ? 100 * st.weekDone / st.weekTotal : 0) + '%';
+    const p = pace(S.tasks, S.settings, localToday());
+    $('pace-label').textContent = S.tasks.length ? p.label : '–';
+    $('pace-label').className = 'val ' + (p.late >= 3 ? 'pace-crit' : p.late ? 'pace-warn' : 'pace-good');
+    $('pace-detail').textContent = !S.tasks.length ? '' : p.late ? `${p.late} task arretrat${p.late === 1 ? 'o' : 'i'}` : p.ahead ? `${p.ahead} task chius${p.ahead === 1 ? 'o' : 'i'} in anticipo` : 'nessun task arretrato';
     $('done-count').textContent = st.doneCount;
     $('done-total').textContent = `/ ${st.total}`;
     $('done-bar').style.width = (st.total ? 100 * st.doneCount / st.total : 0) + '%';
     $('spent').textContent = st.spent;
     $('spent-bar').style.width = Math.min(100, 100 * st.spent / budget) + '%';
-    renderChart(st.week, target);
   }
 
-  // ---------- log ----------
-  function renderChart(week, target) {
-    const from = Math.max(1, week - 7);
-    const weeks = []; for (let w = from; w <= week; w++) weeks.push(w);
-    const vals = weeks.map(w => S.logs.filter(l => weekOf(S.settings.startDate, l.date) === w).reduce((s, l) => s + Number(l.hours || 0), 0));
-    const max = Math.max(target * 1.25, ...vals, 1);
-    const W = 320, H = 132, L = 22, B = 18, T = 14, R = 6;
-    const ph = H - B - T, slot = (W - L - R) / 8, bw = Math.min(22, slot * 0.55);
-    const y = v => T + ph - (v / max) * ph;
-    const ns = 'http://www.w3.org/2000/svg';
-    const el = (n, a, txt) => { const e = document.createElementNS(ns, n); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; };
-    const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `Ore studiate nelle ultime ${weeks.length} settimane` });
-    const ticks = [0, Math.round(max / 2), Math.round(max)];
-    for (const t of ticks) { svg.append(el('line', { class: 'grid', x1: L, x2: W - R, y1: y(t), y2: y(t) }), el('text', { x: L - 4, y: y(t) + 3, 'text-anchor': 'end' }, t)); }
-    weeks.forEach((w, i) => {
-      const cx = L + slot * i + slot / 2, v = vals[i];
-      const hgt = Math.max(0, (v / max) * ph), x = cx - bw / 2, top = T + ph - hgt;
-      if (hgt > 0) {
-        const r = Math.min(4, hgt, bw / 2);
-        const p = el('path', { class: `b${w === week ? ' cur' : ''}`, d: `M${x},${T + ph} V${top + r} Q${x},${top} ${x + r},${top} H${x + bw - r} Q${x + bw},${top} ${x + bw},${top + r} V${T + ph} Z` });
-        p.append(el('title', {}, `Settimana ${w}: ${fmtH(v)} h`));
-        svg.append(p);
-      }
-      svg.append(el('text', { x: cx, y: H - 4, 'text-anchor': 'middle' }, `S${w}`));
-      if (w === week) svg.append(el('text', { class: 'lbl', x: cx, y: Math.max(10, top - 4), 'text-anchor': 'middle' }, `${fmtH(v)} h`));
+  // ---------- lessons ----------
+  let lessonCtl = null;
+  const lessonRules = (t) => `Sei il tutor personale di Riccardo nel suo percorso verso il motorsport.\n\nProfilo: ${PROFILE}\n\nFai la lezione: «${t.title}».\nContesto del compito: ${t.detail || ''}\n\nFormato: in italiano, 600-900 parole, titoli con "## ", elenchi brevi, i termini tecnici inglesi tra parentesi la prima volta. Collega almeno un concetto al suo lavoro con i dati. Niente premesse: parti dal contenuto. Chiudi con "## Verifica" (3 domande) e "## Esercizio" (uno solo, fattibile in 20 minuti).`;
+  function openLesson(id) {
+    S.lessonId = id;
+    $('lesson-panel').hidden = false;
+    const t = S.tasks.find(x => x.id === id) || { id, title: id };
+    $('lesson-title').textContent = t.title;
+    const saved = S.lessons[id];
+    if (saved && (saved.turns || []).length > 1) { renderLesson(); }
+    else { ask(null); }
+    $('lesson-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function renderLesson(streamText) {
+    if (!S.lessonId) return;
+    const turns = (S.lessons[S.lessonId] || {}).turns || [];
+    const nodes = [];
+    turns.forEach((tu, i) => {
+      if (i === 0) return; // standing instructions
+      if (tu.role === 'user') nodes.push(h('p', { class: 'q', text: tu.content }));
+      else nodes.push(...renderMd(tu.content));
     });
-    svg.append(el('line', { class: 'target', x1: L, x2: W - R, y1: y(target), y2: y(target) }));
-    $('hours-chart').replaceChildren(svg);
+    if (streamText != null) {
+      if (S.streaming && S.streaming.question) nodes.push(h('p', { class: 'q', text: S.streaming.question }));
+      nodes.push(...renderMd(streamText));
+    }
+    $('lesson-body').replaceChildren(...nodes);
+    const t = S.tasks.find(x => x.id === S.lessonId);
+    $('lesson-done').hidden = !t || t.status === 'done';
   }
-  function renderLogs() {
-    const list = [...S.logs].sort((a, b) => (b.date + (b.createdAt || '')).localeCompare(a.date + (a.createdAt || ''))).slice(0, 8);
-    const title = id => (S.tasks.find(t => t.id === id) || {}).title;
-    $('log-entries').replaceChildren(...(list.length ? list.map(l => h('li', {},
-      h('span', { class: 'mono muted', text: fmtDate(l.date) }), h('span', { class: 'mono', text: `${fmtH(Number(l.hours))} h` }),
-      h('span', { text: [title(l.taskId), l.note].filter(Boolean).join(' · ') || '—' })))
-      : [h('li', { class: 'muted', style: 'grid-template-columns:1fr', text: 'Nessuna voce ancora. La prima: quanto hai studiato oggi?' })]));
+  async function ask(question) {
+    if (!S.sample || !S.lessonId || S.streaming) return;
+    const id = S.lessonId;
+    const t = S.tasks.find(x => x.id === id) || { id, title: id };
+    const prev = ((S.lessons[id] || {}).turns || []).slice();
+    const turns = prev.length ? prev : [{ role: 'user', content: lessonRules(t) }];
+    if (question) turns.push({ role: 'user', content: question });
+    // keep the instructions turn, drop oldest exchanges if the thread grows long
+    while (JSON.stringify(turns).length > 120000 && turns.length > 3) turns.splice(1, 2);
+    S.streaming = { question };
+    lessonCtl = new AbortController();
+    $('lesson-status').textContent = question ? 'Claude sta rispondendo…' : 'Claude sta preparando la lezione…';
+    $('lesson-stop').hidden = false; $('lesson-ask').disabled = true;
+    renderLesson('');
+    try {
+      const { text, truncated } = await S.sample(turns, { cache: false, signal: lessonCtl.signal, onText: ({ text }) => renderLesson(text) });
+      turns.push({ role: 'assistant', content: text });
+      S.lessons[id] = { taskId: id, turns, updatedAt: new Date().toISOString() };
+      S.streaming = null;
+      renderLesson();
+      $('lesson-status').textContent = truncated ? 'La risposta è stata tagliata: chiedi il resto con una domanda.' : '';
+      await write(db => db.doc('lessons/' + id).set({ taskId: id, turns, updatedAt: new Date().toISOString() }));
+    } catch (e) {
+      S.streaming = null;
+      const code = e && e.code;
+      const msg = { cancelled: 'Fermato.', not_granted: 'Le lezioni in pagina non sono permesse: chiedimela in chat.', sampling_disabled: 'Claude non è disponibile qui: chiedimela in chat.',
+        rate_limited: 'Troppe richieste per ora. Riprova più tardi.', refused: 'Claude non ha risposto a questa richiesta: prova a riformularla.' }[code] || 'Qualcosa è andato storto. Riprova tra poco.';
+      renderLesson(code === 'refused' ? undefined : e && e.text ? e.text : undefined);
+      $('lesson-status').textContent = msg;
+      if (code === 'not_granted' || code === 'sampling_disabled') { S.sample = null; renderTasks(); }
+    } finally {
+      $('lesson-stop').hidden = true; $('lesson-ask').disabled = false;
+    }
   }
-  $('log-date').value = localToday();
-  $('log-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const hours = $('log-hours').value;
-    const date = $('log-date').value || localToday();
-    if (!validHours(hours) || !/^\d{4}-\d{2}-\d{2}$/.test(date)) { $('log-error').hidden = false; return; }
-    $('log-error').hidden = true;
-    const entry = { date, hours: Number(String(hours).trim().replace(',', '.')), note: $('log-note').value.trim(), taskId: $('log-task').value || null, createdAt: new Date().toISOString() };
-    if (await write(db => db.collection('logs').add(entry), 'Salvato nel registro')) { $('log-hours').value = ''; $('log-note').value = ''; }
-  });
+  $('lesson-close').addEventListener('click', () => { lessonCtl?.abort(); S.lessonId = null; $('lesson-panel').hidden = true; });
+  $('lesson-stop').addEventListener('click', () => lessonCtl?.abort());
+  $('lesson-ask').addEventListener('click', () => { const q = $('lesson-q').value.trim(); if (!q) return; $('lesson-q').value = ''; ask(q); });
+  $('lesson-q').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); $('lesson-ask').click(); } });
+  $('lesson-done').addEventListener('click', async () => { if (S.lessonId && await markDone(S.lessonId)) toast('Lezione segnata come fatta'); });
+
+  // ---------- check-in ----------
+  function renderCheckin() {
+    const c = [...S.checkins].sort((a, b) => String(b.date).localeCompare(String(a.date)))[0];
+    if (!c) return;
+    const kids = [h('div', { class: 'sec-head' }, h('h3', { text: `Lunedì ${fmtDate(c.date)} · settimana ${c.week}` })), ...renderMd(c.summary || '')];
+    if ((c.moved || []).length) kids.push(h('p', { class: 'group-title', text: 'Task spostati' }), h('ul', {}, c.moved.map(m => h('li', { text: `${m.title} (S${m.from} → S${m.to})` }))));
+    if ((c.next || []).length) kids.push(h('p', { class: 'group-title', text: 'Questa settimana' }), h('ul', {}, c.next.map(n => h('li', { text: String(n) }))));
+    $('checkin').replaceChildren(...kids);
+  }
 
   // ---------- scorecard ----------
   const scoreTimers = {};
   function renderScores() {
-    if ($('scores').contains(document.activeElement)) return; // don't rebuild under the viewer's hands
+    if ($('scores').contains(document.activeElement)) return;
     const ids = ['dati', 'operazioni', 'pista'];
     const totals = ids.map(id => SCORE_FIELDS.reduce((s, [f]) => s + Number((S.scores[id] || {})[f] || 0), 0));
     const best = Math.max(...totals);
@@ -501,10 +600,7 @@ th { font: 600 12px/1.2 var(--f-body); text-transform: uppercase; letter-spacing
       const card = h('div', { class: `panel score${best > 0 && totals[i] === best ? ' lead' : ''}` });
       const tot = h('span', { class: 'tot', text: `${totals[i]}/20` });
       card.append(h('div', { class: 'sec-head' }, h('h3', { text: TRACK[id] }), tot));
-      const save = () => {
-        clearTimeout(scoreTimers[id]);
-        scoreTimers[id] = setTimeout(() => write(db => db.doc('scores/' + id).set({ ...sc })), 600);
-      };
+      const save = () => { clearTimeout(scoreTimers[id]); scoreTimers[id] = setTimeout(() => write(db => db.doc('scores/' + id).set({ ...sc })), 600); };
       for (const [f, label] of SCORE_FIELDS) {
         const out = h('span', { class: 'mono', text: sc[f] });
         const r = h('input', { type: 'range', min: 0, max: 5, step: 1, id: `score-${id}-${f}`, 'aria-label': `${label} per ${TRACK[id]}`, disabled: !S.db });
@@ -530,7 +626,7 @@ th { font: 600 12px/1.2 var(--f-body); text-transform: uppercase; letter-spacing
     const list = [...S.inbox].sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
     const label = { nuovo: 'In attesa di Claude', letto: 'Letto da Claude', risposto: 'Risposto' };
     $('inbox-list').replaceChildren(...list.map(m => h('li', { class: 'panel' },
-      h('div', { class: 'sec-head' }, h('span', { class: 'small muted mono', text: String(m.createdAt || '').slice(0, 10).split('-').reverse().join('/') }),
+      h('div', { class: 'sec-head' }, h('span', { class: 'small muted mono', text: fmtDate(m.createdAt || '') }),
         h('span', { class: `pill${m.status === 'risposto' ? ' accent' : ''}`, text: label[m.status] || m.status })),
       h('p', { text: m.text }), m.reply ? h('p', { class: 'reply', text: m.reply }) : null)));
   }
@@ -538,7 +634,7 @@ th { font: 600 12px/1.2 var(--f-body); text-transform: uppercase; letter-spacing
     e.preventDefault();
     const text = $('inbox-text').value.trim();
     if (!text) return;
-    if (await write(db => db.collection('inbox').add({ text, createdAt: new Date().toISOString(), status: 'nuovo', reply: '' }), 'Inviato. Lo leggo alla prossima sessione.')) $('inbox-text').value = '';
+    if (await write(db => db.collection('inbox').add({ text, createdAt: new Date().toISOString(), status: 'nuovo', reply: '' }), 'Inviato. Lo leggo al check-in di lunedì o quando me lo chiedi.')) $('inbox-text').value = '';
   });
 
   // ---------- reference sections ----------
@@ -547,7 +643,7 @@ th { font: 600 12px/1.2 var(--f-body); text-transform: uppercase; letter-spacing
     h('td', { class: 'fit', text: fit }), h('td', {}, h('a', { href: src, target: '_blank', rel: 'noopener', text: 'fonte ↗' })))));
   $('compass').replaceChildren(...COMPASS.map(([t, d]) => h('div', { class: 'panel' }, h('h3', { text: t }), h('p', { class: 'muted', text: d }))));
 
-  function renderAll() { renderTasks(); renderLogs(); renderScores(); renderInbox(); $('branch-select').value = S.settings.chosenBranch || ''; }
+  function renderAll() { renderTasks(); renderScores(); renderInbox(); renderCheckin(); $('branch-select').value = S.settings.chosenBranch || ''; }
   renderAll();
 
   // ---------- data ----------
@@ -556,17 +652,24 @@ th { font: 600 12px/1.2 var(--f-body); text-transform: uppercase; letter-spacing
     try { db = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch { db = null; }
     if (!db) { $('offline-note').hidden = false; renderAll(); return; }
     S.db = db;
+    window.claude.use('sample').then(s => { S.sample = s || null; renderTasks(); }).catch(() => {});
     const loadTimer = setTimeout(() => { if (!S.loaded) $('load-note').hidden = false; }, 10000);
     const fail = () => { clearTimeout(loadTimer); $('load-note').hidden = false; };
     const docs = snap => snap.docs.map(d => ({ id: d.id, ...d.data() }));
     db.collection('tasks').onSnapshot(snap => {
       S.tasks = docs(snap);
       if (!snap.metadata.fromCache) { S.loaded = true; clearTimeout(loadTimer); $('load-note').hidden = true; $('empty-state').hidden = !snap.empty; }
-      renderTasks(); renderLogs();
+      renderTasks();
+      if (S.lessonId && !S.streaming) renderLesson();
     }, fail);
-    db.collection('logs').onSnapshot(snap => { S.logs = docs(snap).filter(l => l.date); renderLogs(); renderSummary(stats(S.tasks, S.logs, S.settings, localToday())); }, fail);
     db.collection('scores').onSnapshot(snap => { S.scores = Object.fromEntries(snap.docs.map(d => [d.id, d.data()])); renderScores(); }, fail);
     db.collection('inbox').onSnapshot(snap => { S.inbox = docs(snap); renderInbox(); }, fail);
+    db.collection('checkins').onSnapshot(snap => { S.checkins = docs(snap); renderCheckin(); }, fail);
+    db.collection('lessons').onSnapshot(snap => {
+      S.lessons = Object.fromEntries(snap.docs.map(d => [d.id, d.data()]));
+      renderTasks();
+      if (S.lessonId && !S.streaming) renderLesson();
+    }, fail);
     db.doc('settings/main').onSnapshot(snap => {
       S.settingsExists = snap.exists;
       S.settings = { ...DEFAULT_SETTINGS, ...(snap.exists ? snap.data() : {}) };

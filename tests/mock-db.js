@@ -32,5 +32,17 @@
   });
   const db = { doc: docRef, collection: colRef };
   window.__store = store;
-  window.claude = { use: async (name) => (name === 'db' && !window.__NO_DB__ ? db : null) };
+  window.__sampleCalls = [];
+  const sample = async (input, opts = {}) => {
+    window.__sampleCalls.push(input);
+    const text = window.__SAMPLE_TEXT__ || '## Lezione di prova\nTesto della **lezione**.\n- punto uno';
+    await new Promise(r => setTimeout(r, 10));
+    if (opts.onText) opts.onText({ text, delta: text });
+    return { text, truncated: false, modelTierApplied: 'default' };
+  };
+  window.claude = { use: async (name) => {
+    if (name === 'db') return window.__NO_DB__ ? null : db;
+    if (name === 'sample') return window.__NO_SAMPLE__ ? null : sample;
+    return null;
+  } };
 })();
