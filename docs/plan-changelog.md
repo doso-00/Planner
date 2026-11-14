@@ -17,3 +17,10 @@ qui resta traccia di ogni modifica fatta da Claude e del perché.
   sezione "Ultimo check-in di Claude" (`checkins/<data>`). Capabilities: db + sample.
 - Attività pianificata "Check-in settimanale Rotta per il Paddock" (`trig_013dKXYUkHWFqpX72yCHRsw9`), ogni lunedì 8:47 Europe/Rome,
   prima esecuzione 16 nov 2026: sposta i task in ritardo, risponde all'inbox, scrive il check-in.
+
+## 2026-11-14 — contenuti specifici e link diretti
+- La pagina mostra più link per task (campo `links: [{title, url}]`), visibili come pulsanti sotto il titolo e nella scheda "Prossimo task".
+- 25 task aggiornati con risorse precise al posto di "per esempio…": video e podcast in ordine per `t01`, ricerche LinkedIn
+  già impostate (`t02`, `d06`, `d07`, `o01`, `p05`, `s03`), esempi ufficiali FastF1 e Colab (`d05`, `s02`), download MoTeC e dati di esempio
+  (`d03`), articoli di strategia (`s01`), archivio Al Kamel con percorso preciso (`p03`), corsi commissari ACI Milano/Monza e ACI Varese (`p01`),
+  preparazione gratuita AWS (`D04`), eventi con date (`x03` Motor Valley Fest 6-9 maggio 2027 → settimana 26; `x00`, `c05` date 2027 da annunciare).

@@ -177,3 +177,17 @@ test('no horizontal scroll at 400px, with a lesson open', async () => {
   assert.ok(over <= 0, `overflow ${over}px`);
   await page.close();
 });
+
+test('task links are visible in week list and next card', async () => {
+  const links = [{ title: 'Video Driver61', url: 'https://www.youtube.com/watch?v=qCE54-H2zkM' }, { title: 'Esempio FastF1', url: 'https://docs.fastf1.dev/gen_modules/examples_gallery/plot_speed_traces.html' }];
+  const seed = seedFromPlan({}, {});
+  seed['tasks/b01'] = { ...seed['tasks/b01'], links };
+  const page = await open({ seed });
+  await page.waitForSelector('#next-task [data-next-id="b01"]');
+  for (const sel of ['#next-task', '#week-tasks [data-task-id="b01"]']) {
+    const hrefs = await page.$$eval(`${sel} .t-links a`, as => as.map(a => [a.textContent, a.getAttribute('href')]));
+    assert.deepEqual(hrefs.map(h => h[1]), links.map(l => l.url), sel);
+    assert.ok(hrefs[0][0].includes('Video Driver61'));
+  }
+  await page.close();
+});
